@@ -1,0 +1,28 @@
+---
+
+- hosts: localhost
+  tasks:
+    - name: Load playbook vars
+      include_vars:
+        file: "vars/main.yml"
+
+    - name: Load vault vars
+      include_vars: "{{ lookup('first_found', possible_files) }}"
+      vars:
+        possible_files:
+          - "{{ vault }}"
+          - "vars/vault.yml"
+
+    - name: Delete OpenStack instance
+      os_server:
+        state: absent
+        auth:
+          auth_url: "{{ url }}"
+          username: "{{ os_user }}"
+          password: "{{ os_passwd }}"
+          project_name: "{{ project }}"
+          os_project_domain_name: "{{ project_domain }}"
+          os_user_domain_name: "{{ user_domain }}"
+        name: "{{ vm_name }}"
+        timeout: "{{ timeout }}"
+      delegate_to: localhost
